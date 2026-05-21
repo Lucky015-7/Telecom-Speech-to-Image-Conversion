@@ -12,11 +12,13 @@ _cached_models = {}
 def load_ai_engines():
     """Initializes models into system memory using lazy loading."""
     global _cached_models
-    if not _cached_models:
+    
+    if 'whisper' not in _cached_models:
         print(f"Initializing Whisper Large-v3 Turbo ASR engine on {DEVICE}...")
         _cached_models['whisper'] = whisper.load_model(
             'large-v3-turbo').to(DEVICE)
 
+    if 'sdxl' not in _cached_models:
         print(f"Initializing Stable Diffusion XL Pipeline on {DEVICE}...")
         _cached_models['sdxl'] = AutoPipelineForText2Image.from_pretrained(
             "stabilityai/stable-diffusion-xl-base-1.0",
