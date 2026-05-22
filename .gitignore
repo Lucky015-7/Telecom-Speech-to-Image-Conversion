@@ -1,20 +1,82 @@
-# Virtual Environment
-venv/
-.env
-
-# Python caching
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.pytest_cache/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Data Directories (Ignore the files inside, keep the folders)
-data/inputs/*
-data/outputs/*
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data files
+data/inputs/*.mp3
+data/inputs/*.wav
+data/inputs/*.mpeg
+data/inputs/*.m4a
+data/inputs/*.flac
+data/outputs/*.png
+data/outputs/*.jpg
+data/outputs/*.json
+
+# Keep .gitkeep files
 !data/inputs/.gitkeep
 !data/outputs/.gitkeep
 
-# OS specific files
-.DS_Store
-Thumbs.dbS
+# Model cache
+.cache/
+models/
+*.bin
+*.safetensors
+
+# Logs
+*.log
+logs/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# FastAPI
+.pytest_cache/
