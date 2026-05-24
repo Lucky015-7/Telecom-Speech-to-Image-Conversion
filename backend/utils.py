@@ -1,80 +1,127 @@
-# Heavy ML logic (Whisper transcription & SDXL image generation)
+# Heavy ML logic: Whisper transcription, acoustic feature extraction, and image generation
+
 import torch
 import whisper
 import librosa
 import numpy as np
 from diffusers import AutoPipelineForText2Image
-from backend.config import DEVICE, TORCH_DTYPE
+
+from backend.config import (
+    DEVICE,
+    TORCH_DTYPE,
+    IMAGE_MODEL_ID,
+    NUM_INFERENCE_STEPS,
+    GUIDANCE_SCALE,
+    USE_SAFETENSORS
+)
+from backend.vocab import classify_telecom_category, build_prompt_from_category
 
 _cached_models = {}
 
 
 def load_ai_engines():
-    """Initializes models into system memory using lazy loading."""
+    """
+    Initializes Whisper and image generation models using lazy loading.
+    Models are loaded only once and reused for later requests.
+    """
     global _cached_models
-    
-    if 'whisper' not in _cached_models:
-        print(f"Initializing Whisper Large-v3 Turbo ASR engine on {DEVICE}...")
-        _cached_models['whisper'] = whisper.load_model(
-            'large-v3-turbo').to(DEVICE)
 
-    if 'sdxl' not in _cached_models:
-        print(f"Initializing Stable Diffusion XL Pipeline on {DEVICE}...")
-        _cached_models['sdxl'] = AutoPipelineForText2Image.from_pretrained(
-            "stabilityai/stable-diffusion-xl-base-1.0",
-            torch_dtype=TORCH_DTYPE,
-            variant="fp16" if DEVICE == "cuda" else None,
-            use_safetensors=True
+    if "whisper" not in _cached_models:
+        print(f"Initializing Whisper Large-v3 Turbo ASR engine on {DEVICE}...")
+        _cached_models["whisper"] = whisper.load_model("large-v3-turbo").to(DEVICE)
+
+    if "image_model" not in _cached_models:
+        print(f"Initializing image generation model: {IMAGE_MODEL_ID} on {DEVICE}...")
+
+        model_kwargs = {
+            "torch_dtype": TORCH_DTYPE,
+            "use_safetensors": USE_SAFETENSORS
+        }
+
+        if DEVICE == "cuda" and USE_SAFETENSORS:
+            model_kwargs["variant"] = "fp16"
+
+        _cached_models["image_model"] = AutoPipelineForText2Image.from_pretrained(
+            IMAGE_MODEL_ID,
+            **model_kwargs
         ).to(DEVICE)
 
-        # Apply VRAM memory optimization constraints if executing on a GPU cluster
+        _cached_models["image_model"].enable_attention_slicing()
+
         if DEVICE == "cuda":
-            _cached_models['sdxl'].enable_attention_slicing()
-            _cached_models['sdxl'].enable_vae_slicing()
+            _cached_models["image_model"].enable_vae_slicing()
 
     return _cached_models
 
 
 def compute_acoustic_diagnostics(audio_path: str) -> dict:
-    """Calculates underlying analytical audio wave vectors from a physical audio file."""
+    """
+    Calculates analytical audio features from the uploaded audio file.
+    These values are saved in MongoDB.
+    """
     y, sr = librosa.load(audio_path, sr=22050, mono=True)
-    energy = float(np.mean(librosa.feature.rms(y=y)))
-    brightness = float(
-        np.mean(librosa.feature.spectral_centroid(y=y, sr=sr))) / sr
-    zcr = float(np.mean(librosa.feature.zero_crossing_rate(y)))
+
+    duration = float(librosa.get_duration(y=y, sr=sr))
+    rms_energy = float(np.mean(librosa.feature.rms(y=y)))
+    spectral_centroid = float(np.mean(librosa.feature.spectral_centroid(y=y, sr=sr)))
+    zero_crossing_rate = float(np.mean(librosa.feature.zero_crossing_rate(y)))
+    spectral_rolloff = float(np.mean(librosa.feature.spectral_rolloff(y=y, sr=sr)))
+
+    mfcc_values = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+    mfcc_mean = np.mean(mfcc_values, axis=1)
+
     return {
-        "energy": round(energy, 4),
-        "brightness": round(brightness, 4),
-        "zcr": round(zcr, 4)
+        "duration_seconds": round(duration, 4),
+        "rms_energy": round(rms_energy, 4),
+        "spectral_centroid": round(spectral_centroid, 4),
+        "brightness": round(spectral_centroid / sr, 4),
+        "zero_crossing_rate": round(zero_crossing_rate, 4),
+        "spectral_rolloff": round(spectral_rolloff, 4),
+        "mfcc_mean": [round(float(value), 4) for value in mfcc_mean]
     }
 
 
-def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, any]:
-    """Runs high-fidelity transcription followed by optimized visual synthesis."""
+def transcribe_audio(audio_path: str, whisper_model) -> str:
+    """
+    Converts speech audio into text using Whisper.
+    """
+    transcription_data = whisper_model.transcribe(audio_path, beam_size=5)
+    transcript = transcription_data.get("text", "").strip()
+
+    if not transcript:
+        transcript = "telecommunication network service problem"
+
+    return transcript
+
+
+def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, object]:
+    """
+    Runs the full AI pipeline:
+    1. Load models
+    2. Transcribe audio
+    3. Extract acoustic features
+    4. Classify telecom issue
+    5. Build image prompt
+    6. Generate image
+
+    Returns:
+        transcript, metrics, category, prompt, generated_image
+    """
     engines = load_ai_engines()
 
-    # 1. Process Automatic Speech Recognition transcription
-    transcription_data = engines['whisper'].transcribe(audio_path, beam_size=5)
-    raw_transcript = transcription_data.get("text", "").strip()
+    transcript = transcribe_audio(audio_path, engines["whisper"])
 
-    if not raw_transcript:
-        raw_transcript = "telecommunication infrastructure line connection overview"
+    metrics = compute_acoustic_diagnostics(audio_path)
 
-    # 2. Extract companion signal telemetry metrics
-    telemetry_metrics = compute_acoustic_diagnostics(audio_path)
+    category = classify_telecom_category(transcript)
 
-    # 3. Apply professional prompt design wrappers
-    optimized_prompt = (
-        f"A clear, crisp, professional documentary style photograph depicting: {raw_transcript}. "
-        f"High fidelity, photorealistic, sharp focus, 8k resolution, detailed texture map."
-    )
+    optimized_prompt = build_prompt_from_category(category, transcript)
 
-    # 4. Synthesize image via SDXL base framework
     with torch.inference_mode():
-        generated_image = engines['sdxl'](
+        generated_image = engines["image_model"](
             prompt=optimized_prompt,
-            num_inference_steps=30,
-            guidance_scale=7.5
+            num_inference_steps=NUM_INFERENCE_STEPS,
+            guidance_scale=GUIDANCE_SCALE
         ).images[0]
 
-    return raw_transcript, telemetry_metrics, generated_image
+    return transcript, metrics, category, optimized_prompt, generated_image
