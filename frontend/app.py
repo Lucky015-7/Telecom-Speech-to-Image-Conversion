@@ -318,7 +318,6 @@ with st.sidebar:
 - Voice Transcription (Whisper AI)
 - Acoustic Analysis (Librosa)
 - AI Image Generation (Stable Diffusion)
-- CLIP Similarity Scoring
 - Issue Categorization
 - Generation History
 - Category Analytics
@@ -344,14 +343,14 @@ Advanced AI-powered platform for converting telecom customer voice recordings in
     """)
 
     st.markdown("---")
-    st.caption(f"© 2024 SLT Mobitel AI Platform")
+    st.caption(f"© {datetime.now().year} SLT Mobitel AI Platform")
     st.caption(f"{datetime.now().strftime('%B %d, %Y')}")
 
 # ── Hero Header ───────────────────────────────────────────────────────────────
 st.markdown("""
 <div class='hero-header'>
     <p class='hero-title'>🎯 High-Accuracy <span>Voice-to-Image</span> Engine</p>
-    <p class='hero-subtitle'>Telecom Customer Service Insights Console — Powered by Whisper · Stable Diffusion · CLIP</p>
+    <p class='hero-subtitle'>Telecom Customer Service Insights Console — Powered by Whisper · Stable Diffusion · Librosa</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -541,7 +540,7 @@ else:
         <p>Upload a customer incident recording above to begin AI-powered analysis and visualization.</p>
         <p>Our models will transcribe the audio, analyze acoustic features, categorize the issue,<br>and generate a visual representation of the incident.</p>
         <br>
-        <p style='color:#38bdf8; font-size:0.85rem; letter-spacing:1px;'>WHISPER AI &nbsp;·&nbsp; STABLE DIFFUSION &nbsp;·&nbsp; CLIP &nbsp;·&nbsp; LIBROSA &nbsp;·&nbsp; FASTAPI</p>
+        <p style='color:#38bdf8; font-size:0.85rem; letter-spacing:1px;'>WHISPER AI &nbsp;·&nbsp; STABLE DIFFUSION &nbsp;·&nbsp; LIBROSA &nbsp;·&nbsp; FASTAPI &nbsp;·&nbsp; MONGODB</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -614,6 +613,6 @@ if st.button("Load Category Analytics"):
 st.markdown("""
 <div class='footer'>
     <h4>⚡ Powered by Advanced AI Technology</h4>
-    <p>Whisper AI &nbsp;·&nbsp; Stable Diffusion &nbsp;·&nbsp; CLIP &nbsp;·&nbsp; Librosa &nbsp;·&nbsp; FastAPI &nbsp;·&nbsp; MongoDB</p>
+    <p>Whisper AI &nbsp;·&nbsp; Stable Diffusion &nbsp;·&nbsp; Librosa &nbsp;·&nbsp; FastAPI &nbsp;·&nbsp; MongoDB</p>
 </div>
 """, unsafe_allow_html=True)
