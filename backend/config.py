@@ -1,4 +1,7 @@
 import os
+
+os.environ["KMP_DUPLICATE_LIB_OK"] = os.getenv("KMP_DUPLICATE_LIB_OK", "TRUE")
+
 import torch
 from dotenv import load_dotenv
 
@@ -24,11 +27,14 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "slt_voice_to_image_db")
 
+# Whisper configuration
+WHISPER_MODEL_NAME = os.getenv("WHISPER_MODEL_NAME", "large-v3-turbo")
+
 # Image generation configuration
-IMAGE_MODEL_ID = os.getenv("IMAGE_MODEL_ID", "segmind/tiny-sd")
-NUM_INFERENCE_STEPS = int(os.getenv("NUM_INFERENCE_STEPS", "8"))
-GUIDANCE_SCALE = float(os.getenv("GUIDANCE_SCALE", "6.0"))
-USE_SAFETENSORS = os.getenv("USE_SAFETENSORS", "false").lower() == "true"
+IMAGE_MODEL_ID = os.getenv("IMAGE_MODEL_ID", "stabilityai/stable-diffusion-xl-base-1.0")
+NUM_INFERENCE_STEPS = int(os.getenv("NUM_INFERENCE_STEPS", "30"))
+GUIDANCE_SCALE = float(os.getenv("GUIDANCE_SCALE", "7.5"))
+USE_SAFETENSORS = os.getenv("USE_SAFETENSORS", "true").lower() == "true"
 
 # Audio upload validation
 ALLOWED_AUDIO_EXTENSIONS = {
@@ -38,7 +44,8 @@ ALLOWED_AUDIO_EXTENSIONS = {
     ".mp4",
     ".m4a",
     ".webm",
-    ".ogg"
+    ".ogg",
+    ".mpg"
 }
 
 MAX_AUDIO_FILE_SIZE_MB = 25

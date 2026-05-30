@@ -13,3 +13,4 @@ git+https://github.com/openai/whisper.git
 pymongo>=4.7.0
 python-dotenv>=1.0.1
 pydantic>=2.7.0
+pillow>=10.0.0
