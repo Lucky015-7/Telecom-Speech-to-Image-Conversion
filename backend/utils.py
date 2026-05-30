@@ -17,7 +17,12 @@ from backend.config import (
     GUIDANCE_SCALE,
     USE_SAFETENSORS
 )
-from backend.vocab import classify_telecom_category, build_prompt_from_category
+
+from backend.vocab import (
+    classify_telecom_category,
+    build_prompt_from_category,
+    get_recommended_solutions
+)
 
 _cached_models = {}
 
@@ -72,7 +77,7 @@ def compute_acoustic_diagnostics(audio_path: str) -> dict:
         "brightness": round(brightness, 4),
         "zcr": round(zcr, 4),
 
-        # Extra names for your updated frontend/backend compatibility
+        # Extra names for frontend/backend compatibility
         "rms_energy": round(energy, 4),
         "zero_crossing_rate": round(zcr, 4)
     }
@@ -91,13 +96,14 @@ def transcribe_audio(audio_path: str, whisper_model) -> str:
     return transcript
 
 
-def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, object]:
+def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, list[str], object]:
     """
     Runs transcription, feature extraction, telecom classification,
-    prompt generation, and Stable Diffusion image generation.
+    troubleshooting recommendation generation, prompt generation,
+    and Stable Diffusion image generation.
 
     Returns:
-        transcript, metrics, category, prompt, generated_image
+        transcript, metrics, category, prompt, solutions, generated_image
     """
     engines = load_ai_engines()
 
@@ -107,10 +113,10 @@ def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, 
 
     category = classify_telecom_category(transcript)
 
-    # Uses your telecom category prompt if available
     category_prompt = build_prompt_from_category(category, transcript)
 
-    # Previous professional SDXL prompt style
+    solutions = get_recommended_solutions(category)
+
     optimized_prompt = (
         f"{category_prompt} "
         f"A clear, crisp, professional documentary style photograph depicting: {transcript}. "
@@ -124,4 +130,4 @@ def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, 
             guidance_scale=GUIDANCE_SCALE
         ).images[0]
 
-    return transcript, metrics, category, optimized_prompt, generated_image
+    return transcript, metrics, category, optimized_prompt, solutions, generated_image

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 
@@ -16,6 +16,10 @@ class GenerationDocument(BaseModel):
     metrics: Dict[str, Any] = Field(default_factory=dict)
     category: Optional[str] = None
     prompt: Optional[str] = None
+
+    # New backend feature field
+    solutions: List[str] = Field(default_factory=list)
+
     status: str = "completed"
     feedback: Optional[Dict[str, Any]] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
