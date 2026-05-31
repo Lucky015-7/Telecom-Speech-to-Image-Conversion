@@ -304,15 +304,20 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# ── Configuration Settings ────────────────────────────────────────────────────────────────────
+# Define the local host URL where the FastAPI backend microservice is listening
+
 API_URL = "http://127.0.0.1:8000"
 
-# ── Sidebar ───────────────────────────────────────────────────────────────────
+# ── Sidebar Panel Layout───────────────────────────────────────────────────────────────────
+# Construct an interactive navigation and technical metadata panel in the sidebar
+
 with st.sidebar:
     st.markdown("## 🎯 SLT Mobitel")
     st.markdown("**Generative Dashboard**")
     st.markdown("---")
 
+     # Display the list of core platform capabilities
     st.markdown("#### ⚡ Features")
     st.markdown("""
 - Voice Transcription (Whisper AI)
@@ -325,6 +330,7 @@ with st.sidebar:
 
     st.markdown("---")
 
+    # List all supported audio formats accepted by both frontend & backend uploaders
     st.markdown("#### 🎵 Supported Formats")
     st.markdown("""
 - MPEG Audio (.mpeg)
