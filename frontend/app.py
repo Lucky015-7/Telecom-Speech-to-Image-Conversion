@@ -576,8 +576,12 @@ else:
 st.markdown("---")
 st.markdown("<h3>📂 Recent Backend Generation History</h3>", unsafe_allow_html=True)
 
+# Operator triggers database query upon clicking
 if st.button("Load Recent Results"):
     try:
+
+# Request all recent generation results from the backend audit API
+    
         history_response = requests.get(f"{API_URL}/api/v1/results")
 
         if history_response.status_code == 200:
@@ -587,6 +591,8 @@ if st.button("Load Recent Results"):
             if len(results) == 0:
                 st.info("No previous generation records found.")
             else:
+
+    # Loop through database transactions and render descriptive cards + images
                 for item in results:
                     st.markdown(f"""
                     <div class='history-item'>
@@ -600,6 +606,8 @@ if st.button("Load Recent Results"):
 
                     item_id = item.get("_id")
                     if item_id:
+
+          # Fetch the static PNG bytes from the secure fetch image endpoint
                         image_url = f"{API_URL}/api/v1/fetch-image/{item_id}"
                         image_response = requests.get(image_url)
 
@@ -615,12 +623,15 @@ if st.button("Load Recent Results"):
     except Exception as history_error:
         st.error(f"❌ Could not connect to backend history endpoint: {str(history_error)}")
 
-# ── Analytics Section ─────────────────────────────────────────────────────────
+# ── Incident Analytics Section 
+# Displays a data matrix of complaint category distributions aggregated by MongoDB
 st.markdown("---")
 st.markdown("<h3>📊 Backend Analytics</h3>", unsafe_allow_html=True)
 
 if st.button("Load Category Analytics"):
     try:
+
+ # Request the category aggregation results from the analytics API
         analytics_response = requests.get(f"{API_URL}/api/v1/analytics/categories")
 
         if analytics_response.status_code == 200:
@@ -630,6 +641,8 @@ if st.button("Load Category Analytics"):
             if len(analytics) == 0:
                 st.info("No analytics data available yet.")
             else:
+
+        # Render the returned counts as a structured Streamlit table
                 st.table(analytics)
         else:
             st.error(f"❌ Could not load analytics: {analytics_response.text}")
@@ -637,7 +650,8 @@ if st.button("Load Category Analytics"):
     except Exception as analytics_error:
         st.error(f"❌ Could not connect to backend analytics endpoint: {str(analytics_error)}")
 
-# ── Footer ────────────────────────────────────────────────────────────────────
+# ── Project Brand Footer 
+# Premium developer signature signature block at the bottom of the viewport
 st.markdown("""
 <div class='footer'>
     <h4>⚡ Powered by Advanced AI Technology</h4>
