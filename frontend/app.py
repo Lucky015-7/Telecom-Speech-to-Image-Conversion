@@ -414,11 +414,14 @@ if uploaded_file is not None:
         )
 
     #  ── Pipeline Execution  ────────────────────────────────────────────────────────────
-    if trigger_generation:
+    # Triggered upon clicking the generation button
+        
+        if trigger_generation:
         with st.spinner("Processing deep network pipeline stages… (This may take a moment)"):
             progress_bar = st.progress(0)
             progress_bar.progress(20)
 
+    # Build a multipart/form-data payload containing raw audio file bytes
             multipart_payload = {
                 "file": (
                     uploaded_file.name,
@@ -429,24 +432,26 @@ if uploaded_file is not None:
 
             try:
                 progress_bar.progress(45)
+  # Send the multipart request to the FastAPI backend's process-audio route
                 response = requests.post(
                     f"{API_URL}/api/v1/process-audio",
                     files=multipart_payload
                 )
                 progress_bar.progress(75)
-
+ # If connection and processing are successful, unpack results
                 if response.status_code == 200:
                     payload = response.json()
                     progress_bar.progress(100)
 
-                    # Unpack nested "result" key (Doc 1 backend contract)
+# Unpack the nested "result" document matching backend schemas
                     result    = payload.get("result", {})
                     result_id = result.get("_id")
                     transcript = result.get("transcript", "No transcript available")
                     metrics    = result.get("metrics", {})
                     category   = result.get("category", "unknown")
                     prompt     = result.get("prompt", "No prompt available")
-
+                    
+ # Display success notification
                     st.markdown("""
                     <div class='success-box'>
                         <h4>✅ Generative Analysis Complete!</h4>
@@ -455,13 +460,14 @@ if uploaded_file is not None:
                     """, unsafe_allow_html=True)
 
                     st.markdown("<br>", unsafe_allow_html=True)
-
-                    # ── Acoustic Metrics ──────────────────────────────────────
+                    
+ # ── Render Acoustic Diagnostics Cards 
+ # Displays Librosa-calculated waveform features inside premium interactive cards
                     st.markdown("<h3 style='color:#38bdf8; text-align:center;'>📡 Acoustic Analysis Metrics</h3>", unsafe_allow_html=True)
                     st.markdown("<br>", unsafe_allow_html=True)
 
                     m1, m2, m3 = st.columns(3)
-
+# Card 1: Signal RMS Loudness (Energy Level)
                     with m1:
                         st.markdown(f"""
                         <div class='metric-card'>
@@ -470,7 +476,7 @@ if uploaded_file is not None:
                             <div class='metric-sub'>Energy Level</div>
                         </div>
                         """, unsafe_allow_html=True)
-
+ # Card 2: Spectral Tonal Brightness (Tonal Quality)
                     with m2:
                         st.markdown(f"""
                         <div class='metric-card'>
@@ -479,7 +485,7 @@ if uploaded_file is not None:
                             <div class='metric-sub'>Tonal Quality</div>
                         </div>
                         """, unsafe_allow_html=True)
-
+ # Card 3: Zero-Crossing Rate (Frequency Analysis)
                     with m3:
                         st.markdown(f"""
                         <div class='metric-card'>
@@ -491,7 +497,8 @@ if uploaded_file is not None:
 
                     st.markdown("<br>", unsafe_allow_html=True)
 
-                    # ── Telecom Category ──────────────────────────────────────
+     # ── Render Telecom Issue Category 
+     # Displays the category badge parsed by the vocab rules
                     st.markdown("""
                     <div class='panel'>
                         <div class='panel-title'>🧠 Telecom Issue Category</div>
@@ -500,8 +507,9 @@ if uploaded_file is not None:
                     st.markdown(f"<div style='margin-top:-1rem; padding:0 0.5rem;'><span class='category-badge'>{category}</span></div>", unsafe_allow_html=True)
 
                     st.markdown("<br>", unsafe_allow_html=True)
-
-                    # ── Transcript ────────────────────────────────────────────
+# ── Render ASR Complaint Transcript 
+# Displays the text transcribed by the Whisper engine
+                   
                     st.markdown("""
                     <div class='panel'>
                         <div class='panel-title'>📋 Extracted Customer Complaint Transcript</div>
@@ -511,7 +519,8 @@ if uploaded_file is not None:
 
                     st.markdown("<br>", unsafe_allow_html=True)
 
-                    # ── Image Prompt ──────────────────────────────────────────
+        # ── Render Image Generation Prompt 
+        # Displays the detailed visual prompt built by the vocabulary layer
                     st.markdown("""
                     <div class='panel'>
                         <div class='panel-title'>📝 Generated Image Prompt</div>
@@ -521,10 +530,13 @@ if uploaded_file is not None:
 
                     st.markdown("<br>", unsafe_allow_html=True)
 
-                    # ── Generated Image ───────────────────────────────────────
+         # ── Render Final Synthesized Image ────────────────────────
+         # Securely requests the generated PNG from the backend using the database result ID
                     if result_id:
                         image_request_url = f"{API_URL}/api/v1/fetch-image/{result_id}"
                         image_data = requests.get(image_request_url)
+
+         # If download is successful, render the centered visual output
 
                         if image_data.status_code == 200:
                             st.markdown("<h3 style='color:#38bdf8;'>🖼️ High-Fidelity Synthesized Visual Output</h3>", unsafe_allow_html=True)
@@ -547,7 +559,8 @@ if uploaded_file is not None:
                 st.error(f"❌ Could not connect to processing node backend server: {str(connection_error)}")
 
 else:
-    # ── Welcome State ─────────────────────────────────────────────────────────
+     # ── Onboarding Welcome Screen 
+    # Renders an introductory guide with dynamic tech stack highlights when no file is uploaded
     st.markdown("""
     <div class='welcome-card'>
         <h2>👋 Welcome to the Voice-to-Image AI Platform</h2>
@@ -558,7 +571,8 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-# ── History Section ───────────────────────────────────────────────────────────
+# ── Operations History Section 
+# Displays persistent past complaints and generated pictures from database queries
 st.markdown("---")
 st.markdown("<h3>📂 Recent Backend Generation History</h3>", unsafe_allow_html=True)
 
