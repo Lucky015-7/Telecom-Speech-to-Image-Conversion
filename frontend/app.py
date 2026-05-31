@@ -413,10 +413,9 @@ if uploaded_file is not None:
             use_container_width=True
         )
 
-    #  ── Pipeline Execution  ────────────────────────────────────────────────────────────
+    # ── Pipeline Execution ────────────────────────────────────────────────────
     # Triggered upon clicking the generation button
-        
-        if trigger_generation:
+    if trigger_generation:
         with st.spinner("Processing deep network pipeline stages… (This may take a moment)"):
             progress_bar = st.progress(0)
             progress_bar.progress(20)
