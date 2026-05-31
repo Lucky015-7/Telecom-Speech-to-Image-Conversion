@@ -343,6 +343,7 @@ with st.sidebar:
 
     st.markdown("---")
 
+    # Provide brief context about the application's underlying architecture
     st.markdown("#### ℹ️ About")
     st.markdown("""
 Advanced AI-powered platform for converting telecom customer voice recordings into visual representations using state-of-the-art deep learning.
@@ -353,6 +354,8 @@ Advanced AI-powered platform for converting telecom customer voice recordings in
     st.caption(f"{datetime.now().strftime('%B %d, %Y')}")
 
 # ── Hero Header ───────────────────────────────────────────────────────────────
+# Renders a sleek, modern glassmorphic header block with soft neon highlights
+
 st.markdown("""
 <div class='hero-header'>
     <p class='hero-title'>🎯 High-Accuracy <span>Voice-to-Image</span> Engine</p>
@@ -360,7 +363,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── Upload Section ────────────────────────────────────────────────────────────
+# ── File Upload Widget ────────────────────────────────────────────────────────────
+# Displays a styled upload boundary card
+
 st.markdown("""
 <div class='upload-wrap'>
     <h4 style='color:#7dd3fc; text-align:center; margin:0 0 0.5rem 0; font-family:Syne,sans-serif;'>
@@ -372,16 +377,19 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# Streamlit file upload boundary widget supporting audio files
 uploaded_file = st.file_uploader(
     "Choose an audio file",
     type=["mpeg", "mp3", "wav", "m4a", "webm", "ogg"],
     help="Upload a customer incident recording for AI analysis"
 )
 
-# ── Main Logic ────────────────────────────────────────────────────────────────
+# ── Main Generation & Operations Logic ────────────────────────────────────────────────────────────────
+# Triggered only when a file has been successfully uploaded into memory
+
 if uploaded_file is not None:
 
-    # File info card
+ # File Details Card: Displays name, file size (in KB), and mime-type
     st.markdown(f"""
     <div class='file-card'>
         <strong>📄 File:</strong> {uploaded_file.name}&nbsp;&nbsp;
@@ -390,13 +398,13 @@ if uploaded_file is not None:
     </div>
     """, unsafe_allow_html=True)
 
-    # Audio preview
+    # Audio Playback Player: Native preview player to listen to the uploaded incident recording
     st.markdown("<h4 style='color:#7dd3fc;'>🔊 Audio Preview</h4>", unsafe_allow_html=True)
     st.audio(uploaded_file, format=uploaded_file.type)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Generate button — centered
+# Centered Primary CTA Button to trigger the deep learning pipeline
     col_l, col_c, col_r = st.columns([1, 2, 1])
     with col_c:
         trigger_generation = st.button(
@@ -405,7 +413,7 @@ if uploaded_file is not None:
             use_container_width=True
         )
 
-    # ── Processing ────────────────────────────────────────────────────────────
+    #  ── Pipeline Execution  ────────────────────────────────────────────────────────────
     if trigger_generation:
         with st.spinner("Processing deep network pipeline stages… (This may take a moment)"):
             progress_bar = st.progress(0)
