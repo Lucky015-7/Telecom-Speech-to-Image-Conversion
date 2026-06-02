@@ -21,8 +21,11 @@ os.makedirs(INPUT_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # MongoDB configuration
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://kodippilisewwandi_db_user:Sagee123@voice2imagedb.dtjiizc.mongodb.net/?appName=voice2imagedb")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "slt_voice_to_image_db")
+
+# Whisper model configuration
+WHISPER_MODEL_NAME = os.getenv("WHISPER_MODEL_NAME", "large-v3-turbo")
 
 # Image generation configuration
 IMAGE_MODEL_ID = os.getenv("IMAGE_MODEL_ID", "segmind/tiny-sd")

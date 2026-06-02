@@ -153,6 +153,7 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
             "metrics": {},
             "category": None,
             "prompt": None,
+            "solutions": [],
             "status": "processing",
             "feedback": None,
             "created_at": datetime.utcnow(),
@@ -162,7 +163,7 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
         inserted_result = generations_collection.insert_one(generation_doc)
         result_id = inserted_result.inserted_id
 
-        transcript, metrics, category, prompt, image_object = execute_generative_synthesis(
+        transcript, metrics, category, prompt, solutions, image_object = execute_generative_synthesis(
             staged_audio_path
         )
 
@@ -178,6 +179,7 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
                     "metrics": metrics,
                     "category": category,
                     "prompt": prompt,
+                    "solutions": solutions,
                     "output_image_path": staged_image_path,
                     "status": "completed",
                     "updated_at": datetime.utcnow()
@@ -189,7 +191,7 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
 
         return {
             "status": "success",
-            "message": "Audio processed and image generated successfully.",
+            "message": "Audio processed, image generated, and troubleshooting recommendations created successfully.",
             "result": serialize_mongo_document(updated_doc)
         }
 
@@ -197,7 +199,11 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
         raise
 
     except Exception as error:
+        import traceback
+
         error_message = str(error)
+        print("BACKEND ERROR:")
+        print(traceback.format_exc())
 
         log_error(
             error_message=error_message,

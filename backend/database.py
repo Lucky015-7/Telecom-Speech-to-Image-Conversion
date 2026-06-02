@@ -1,11 +1,19 @@
 import sys
 from pymongo import MongoClient, DESCENDING
+from pymongo.errors import PyMongoError
+import certifi
+
 from backend.config import MONGO_URI, MONGO_DB_NAME
 
-# Try to connect to real MongoDB with a fast 2-second timeout
+# Try to connect to real MongoDB with a fast 2-second timeout and TLS support
 try:
     print(f"Connecting to MongoDB at {MONGO_URI}...")
-    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
+    client = MongoClient(
+        MONGO_URI,
+        tls=True,
+        tlsCAFile=certifi.where(),
+        serverSelectionTimeoutMS=2000
+    )
     # Trigger a quick connection test
     client.admin.command("ping")
     db = client[MONGO_DB_NAME]
@@ -58,5 +66,6 @@ def create_indexes():
         generations_collection.create_index("category")
         generations_collection.create_index("status")
         error_logs_collection.create_index([("created_at", DESCENDING)])
-    except Exception as error:
-        print("Could not create MongoDB indexes:", error)
+        print("MongoDB indexes created successfully.")
+    except PyMongoError as error:
+        print("MongoDB index creation failed:", error)

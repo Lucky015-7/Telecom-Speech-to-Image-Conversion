@@ -14,7 +14,11 @@ from backend.config import (
     GUIDANCE_SCALE,
     USE_SAFETENSORS
 )
-from backend.vocab import classify_telecom_category, build_prompt_from_category
+from backend.vocab import (
+    classify_telecom_category,
+    build_prompt_from_category,
+    get_recommended_solutions
+)
 
 _cached_models = {}
 
@@ -94,18 +98,19 @@ def transcribe_audio(audio_path: str, whisper_model) -> str:
     return transcript
 
 
-def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, object]:
+def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, list[str], object]:
     """
     Runs the full AI pipeline:
     1. Load models
     2. Transcribe audio
     3. Extract acoustic features
     4. Classify telecom issue
-    5. Build image prompt
-    6. Generate image
+    5. Retrieve troubleshooting solutions
+    6. Build image prompt
+    7. Generate image
 
     Returns:
-        transcript, metrics, category, prompt, generated_image
+        transcript, metrics, category, prompt, solutions, generated_image
     """
     engines = load_ai_engines()
 
@@ -114,6 +119,8 @@ def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, 
     metrics = compute_acoustic_diagnostics(audio_path)
 
     category = classify_telecom_category(transcript)
+
+    solutions = get_recommended_solutions(category)
 
     optimized_prompt = build_prompt_from_category(category, transcript)
 
@@ -124,4 +131,4 @@ def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, 
             guidance_scale=GUIDANCE_SCALE
         ).images[0]
 
-    return transcript, metrics, category, optimized_prompt, generated_image
+    return transcript, metrics, category, optimized_prompt, solutions, generated_image
