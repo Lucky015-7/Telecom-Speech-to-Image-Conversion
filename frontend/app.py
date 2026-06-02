@@ -169,7 +169,6 @@ st.markdown("""
         gap: 0.5rem;
     }
 
-    /* Info / success / result boxes */
     .info-box {
         background: rgba(14,165,233,0.07);
         border-left: 4px solid #38bdf8;
@@ -179,6 +178,17 @@ st.markdown("""
         font-size: 1rem;
         line-height: 1.7;
         margin: 0.8rem 0;
+    }
+
+    .solution-item {
+        background: rgba(129, 140, 248, 0.08);
+        border-left: 3px solid #818cf8;
+        border-radius: 8px;
+        padding: 0.8rem 1.2rem;
+        margin: 0.5rem 0;
+        color: #e0f2fe;
+        font-size: 0.95rem;
+        list-style-type: none;
     }
 
     .success-box {
@@ -432,6 +442,7 @@ if uploaded_file is not None:
                     metrics    = result.get("metrics", {})
                     category   = result.get("category", "unknown")
                     prompt     = result.get("prompt", "No prompt available")
+                    solutions  = result.get("solutions", [])
 
                     st.markdown("""
                     <div class='success-box'>
@@ -484,6 +495,20 @@ if uploaded_file is not None:
                     </div>
                     """, unsafe_allow_html=True)
                     st.markdown(f"<div style='margin-top:-1rem; padding:0 0.5rem;'><span class='category-badge'>{category}</span></div>", unsafe_allow_html=True)
+
+                    st.markdown("<br>", unsafe_allow_html=True)
+
+                    # ── Recommended Solutions ──────────────────────────────────
+                    st.markdown("""
+                    <div class='panel'>
+                        <div class='panel-title'>🛠️ Recommended Troubleshooting Solutions</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    if solutions:
+                        solutions_html = "".join([f"<li class='solution-item'>🔑 {sol}</li>" for sol in solutions])
+                        st.markdown(f"<div style='margin-top:-1rem; padding:0 0.5rem;'>{solutions_html}</div>", unsafe_allow_html=True)
+                    else:
+                        st.markdown("<div class='info-box' style='margin-top:-1rem;'>No specific troubleshooting solutions recommended for this category.</div>", unsafe_allow_html=True)
 
                     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -567,6 +592,7 @@ if st.button("Load Recent Results"):
                         <p><strong>⚙️ Status:</strong> {item.get('status')}</p>
                         <p><strong>🧠 Category:</strong> {item.get('category')}</p>
                         <p><strong>📋 Transcript:</strong> {item.get('transcript')}</p>
+                        <p><strong>🛠️ Troubleshooting Solutions:</strong> {", ".join(item.get('solutions', [])) if item.get('solutions') else 'None'}</p>
                     </div>
                     """, unsafe_allow_html=True)
 
