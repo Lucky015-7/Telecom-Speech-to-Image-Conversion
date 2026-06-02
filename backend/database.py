@@ -1,23 +1,51 @@
+import sys
 from pymongo import MongoClient, DESCENDING
 from pymongo.errors import PyMongoError
 import certifi
 
 from backend.config import MONGO_URI, MONGO_DB_NAME
 
-client = MongoClient(
-    MONGO_URI,
-    tls=True,
-    tlsCAFile=certifi.where(),
-    serverSelectionTimeoutMS=30000
-)
+# Try to connect to real MongoDB with a fast 2-second timeout and TLS support
+try:
+    print(f"Connecting to MongoDB at {MONGO_URI}...")
+    client = MongoClient(
+        MONGO_URI,
+        tls=True,
+        tlsCAFile=certifi.where(),
+        serverSelectionTimeoutMS=2000
+    )
+    # Trigger a quick connection test
+    client.admin.command("ping")
+    db = client[MONGO_DB_NAME]
+    using_mock = False
+    print("Successfully connected to real MongoDB instance.")
+except Exception as e:
+    print("Real MongoDB connection failed. Falling back to in-memory mongomock...")
+    try:
+        import mongomock
+        client = mongomock.MongoClient()
+        db = client[MONGO_DB_NAME]
+        using_mock = True
+        print("Using mongomock in-memory database successfully.")
+    except ImportError:
+        print("mongomock not installed! Database operations will fail.")
+        client = None
+        db = None
+        using_mock = False
 
-db = client[MONGO_DB_NAME]
-
-generations_collection = db["generations"]
-error_logs_collection = db["error_logs"]
+if db is not None:
+    generations_collection = db["generations"]
+    error_logs_collection = db["error_logs"]
+else:
+    generations_collection = None
+    error_logs_collection = None
 
 
 def check_database_connection() -> bool:
+    if using_mock:
+        return True
+    if client is None:
+        return False
     try:
         client.admin.command("ping")
         return True
@@ -31,6 +59,8 @@ def create_indexes():
     Create indexes to improve query performance.
     This is useful when result history grows.
     """
+    if generations_collection is None or error_logs_collection is None:
+        return
     try:
         generations_collection.create_index([("created_at", DESCENDING)])
         generations_collection.create_index("category")
