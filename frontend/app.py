@@ -506,7 +506,7 @@ if uploaded_file is not None:
 
                     st.markdown("<br>", unsafe_allow_html=True)
 
-     # ── Render Telecom Issue Category 
+     # ── Render Telecom Issue Category
      # Displays the category badge parsed by the vocab rules
                     st.markdown("""
                     <div class='panel'>
