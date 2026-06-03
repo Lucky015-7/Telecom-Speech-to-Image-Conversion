@@ -510,7 +510,7 @@ if uploaded_file is not None:
      # Displays the category badge parsed by the vocab rules
                     st.markdown("""
                     <div class='panel'>
-                        <div class='panel-title'>🧠 Telecom Issue Category</div>
+                        <div class='panel-title'> Telecom Issue Category</div>
                     </div>
                     """, unsafe_allow_html=True)
                     st.markdown(f"<div style='margin-top:-1rem; padding:0 0.5rem;'><span class='category-badge'>{category}</span></div>", unsafe_allow_html=True)
@@ -523,7 +523,7 @@ if uploaded_file is not None:
                     </div>
                     """, unsafe_allow_html=True)
                     if solutions:
-                        solutions_html = "".join([f"<li class='solution-item'>🔑 {sol}</li>" for sol in solutions])
+                        solutions_html = "".join([f"<li class='solution-item'> {sol}</li>" for sol in solutions])
                         st.markdown(f"<div style='margin-top:-1rem; padding:0 0.5rem;'>{solutions_html}</div>", unsafe_allow_html=True)
                     else:
                         st.markdown("<div class='info-box' style='margin-top:-1rem;'>No specific troubleshooting solutions recommended for this category.</div>", unsafe_allow_html=True)
@@ -544,7 +544,7 @@ if uploaded_file is not None:
         # Displays the detailed visual prompt built by the vocabulary layer
                     st.markdown("""
                     <div class='panel'>
-                        <div class='panel-title'>📝 Generated Image Prompt</div>
+                        <div class='panel-title'> Generated Image Prompt</div>
                     </div>
                     """, unsafe_allow_html=True)
                     st.markdown(f"<div class='info-box' style='margin-top:-1rem;'>{prompt}</div>", unsafe_allow_html=True)
@@ -560,7 +560,7 @@ if uploaded_file is not None:
          # If download is successful, render the centered visual output
 
                         if image_data.status_code == 200:
-                            st.markdown("<h3 style='color:#38bdf8;'>🖼️ High-Fidelity Synthesized Visual Output</h3>", unsafe_allow_html=True)
+                            st.markdown("<h3 style='color:#38bdf8;'> High-Fidelity Synthesized Visual Output</h3>", unsafe_allow_html=True)
                             col1, col2, col3 = st.columns([1, 4, 1])
                             with col2:
                                 st.image(
@@ -584,7 +584,7 @@ else:
     # Renders an introductory guide with dynamic tech stack highlights when no file is uploaded
     st.markdown("""
     <div class='welcome-card'>
-        <h2>👋 Welcome to the Voice-to-Image AI Platform</h2>
+        <h2> Welcome to the Voice-to-Image AI Platform</h2>
         <p>Upload a customer incident recording above to begin AI-powered analysis and visualization.</p>
         <p>Our models will transcribe the audio, analyze acoustic features, categorize the issue,<br>and generate a visual representation of the incident.</p>
         <br>
@@ -595,7 +595,7 @@ else:
 # ── Operations History Section 
 # Displays persistent past complaints and generated pictures from database queries
 st.markdown("---")
-st.markdown("<h3>📂 Recent Backend Generation History</h3>", unsafe_allow_html=True)
+st.markdown("<h3> Recent Backend Generation History</h3>", unsafe_allow_html=True)
 
 # Operator triggers database query upon clicking
 if st.button("Load Recent Results"):
