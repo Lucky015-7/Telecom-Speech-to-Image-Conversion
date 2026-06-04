@@ -64,32 +64,39 @@ TELECOM_CATEGORY_KEYWORDS = {
 
 CATEGORY_PROMPTS = {
     "slow_internet": (
-        "A simple realistic image of a mobile phone showing slow internet "
-        "loading symbol with a telecom network tower in the background."
+        "A high-fidelity, professional documentary-style photograph of a modern smartphone resting on a wooden desk, "
+        "showing a loading spinner and a low bandwidth gauge on a speed test application. In the soft, blurry background, "
+        "a telecom cellular transmission tower is visible against a twilight sky. Volumetric lighting, shallow depth of field, "
+        "realistic textures, sharp focus, 8k resolution."
     ),
     "no_signal": (
-        "A simple realistic image of a smartphone showing no signal bars "
-        "near a telecom tower."
+        "A detailed close-up photograph of a sleek smartphone screen held in a hand, showing a 'No Service' message "
+        "and empty network signal bars. An out-of-focus telecom cellular tower stands in the distant background under overcast weather. "
+        "Moody natural lighting, shallow depth of field, highly detailed, realistic, 8k resolution."
     ),
     "call_drop": (
-        "A simple realistic image of a person experiencing a dropped phone call "
-        "with a weak telecom signal icon."
+        "A candid documentary-style photograph of a frustrated person looking at a smartphone displaying a 'Call Failed' screen. "
+        "A glowing red disconnected call icon is visible. Indoor ambient light, clean cinematic tones, highly realistic, "
+        "detailed textures, sharp focus, 8k resolution."
     ),
     "router_issue": (
-        "A simple realistic image of a Wi-Fi router with warning light and "
-        "connection problem."
+        "A professional product photograph of a modern Wi-Fi home router on a shelf. A single glowing red warning light "
+        "blinks next to the internet status icon. Detailed ethernet cables are connected to the back. Soft studio lighting, "
+        "realistic plastic and metallic textures, clean composition, 8k resolution."
     ),
     "billing_issue": (
-        "A simple realistic image of a mobile billing issue with invoice, "
-        "payment alert, and telecom service symbols."
+        "A clean, professional flat lay photograph of a modern workspace featuring a tablet displaying a telecom invoice spreadsheet, "
+        "a credit card, and a smartphone showing a warning payment notification. Natural soft side lighting, sharp details, "
+        "organized desk setup, realistic materials, 8k resolution."
     ),
     "sim_issue": (
-        "A simple realistic image of a SIM card problem with a smartphone "
-        "and telecom support symbol."
+        "A detailed macro photograph of a gold-plated nano SIM card being inserted into a smartphone SIM tray with a metal ejector pin. "
+        "Crisp focus on the SIM card metallic circuits, soft ambient studio lighting, highly detailed textures, realistic metallic reflection."
     ),
     "general_telecom": (
-        "A simple realistic image showing a telecom customer support scenario "
-        "with network infrastructure."
+        "A professional documentary-style photograph showing telecom customer service infrastructure, a neat modern server rack cabinet "
+        "with blue blinking LED status lights, and a support technician's workspace in a clean environment. Soft technical illumination, "
+        "high fidelity, 8k resolution."
     )
 }
 
