@@ -58,6 +58,26 @@ TELECOM_CATEGORY_KEYWORDS = {
         "sim registration",
         "new sim",
         "සිම්"
+    ],
+    "network_outage": [
+        "storm",
+        "dead",
+        "lightning",
+        "tower",
+        "breakdown",
+        "outage",
+        "weather",
+        "rain"
+    ],
+    "fiber_installation": [
+        "fiber",
+        "installation",
+        "apartment",
+        "socket",
+        "modem",
+        "install",
+        "television",
+        "equipment"
     ]
 }
 
@@ -97,6 +117,16 @@ CATEGORY_PROMPTS = {
         "A professional documentary-style photograph showing telecom customer service infrastructure, a neat modern server rack cabinet "
         "with blue blinking LED status lights, and a support technician's workspace in a clean environment. Soft technical illumination, "
         "high fidelity, 8k resolution."
+    ),
+    "network_outage": (
+        "A dramatic, high-fidelity professional documentary-style photograph of a large telecom cellular transmission tower under dark, "
+        "heavy storm clouds with bright lightning striking in the distant sky. Working technical crew, Atmospheric moody lighting, realistic textures, rain droplets, "
+        "sharp focus, 8k resolution."
+    ),
+    "fiber_installation": (
+        "A clean, professional photograph of a modern residential apartment interior showing a white wall socket with a fiber optic cable plug. "
+        "A brand new high-tech fiber modem and home television equipment are neatly placed nearby on a stand. Soft natural lighting, "
+        "realistic textures, sharp focus, 8k resolution."
     )
 }
 
@@ -174,6 +204,18 @@ CATEGORY_SOLUTIONS = {
         "Perform basic client information verification.",
         "Log a detailed description of the incident in the support CRM ticketing system.",
         "Escalate to Level 2 technical engineering queue if issue is unresolved after primary checks."
+    ],
+    "network_outage": [
+        "Verify regional power grid supply status and grid restoration timeline with the utility company.",
+        "Confirm battery backup or generator operation at the nearest affected cellular base station tower.",
+        "Monitor technical crew deployment logs and track real-time hardware repair tickets.",
+        "Set up auto-SMS alerts to notify affected customers once the network node returns online."
+    ],
+    "fiber_installation": [
+        "Schedule a technical home visit appointment for physical fiber terminal (ONT) wall-mounting.",
+        "Verify local fiber distribution point (FDP) port availability and signal level for the building.",
+        "Prepare fiber optical modem and television set-top box equipment provisioning scripts.",
+        "Log customer service activation request details in the broadband billing provisioning database."
     ]
 }
 
