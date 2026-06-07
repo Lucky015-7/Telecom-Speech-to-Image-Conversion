@@ -11,8 +11,12 @@ from backend.config import (
     INPUT_DIR,
     OUTPUT_DIR,
     ALLOWED_AUDIO_EXTENSIONS,
-    MAX_AUDIO_FILE_SIZE_BYTES
+    MAX_AUDIO_FILE_SIZE_BYTES,
+    DEVICE,
+    IMAGE_MODEL_ID,
+    WHISPER_MODEL_NAME
 )
+
 from backend.database import (
     check_database_connection,
     create_indexes,
@@ -130,6 +134,22 @@ def root():
     return {
         "message": "SLT Mobitel Voice-to-Image Backend is running",
         "database_connected": check_database_connection()
+    }
+
+@app.get("/api/v1/health")
+def health_check():
+    """
+    Returns backend health status, database connection state,
+    and active AI model configuration.
+    """
+    database_connected = check_database_connection()
+
+    return {
+        "status": "healthy" if database_connected else "degraded",
+        "database_connected": database_connected,
+        "device": DEVICE,
+        "whisper_model": WHISPER_MODEL_NAME,
+        "image_model": IMAGE_MODEL_ID
     }
 
 
