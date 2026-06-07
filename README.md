@@ -31,6 +31,19 @@ telecom-voice-image/
     ├── inputs/              # Directory to place incoming voice files (e.g., voice3.mpeg)
     └── outputs/             # Directory where generated Stable Diffusion images are saved
 ```
+## Backend API Features
+
+The backend provides the following FastAPI endpoints:
+
+- `POST /api/v1/process-audio` - Upload an audio file and generate a telecom-related image.
+- `GET /api/v1/results` - View recent generated results.
+- `GET /api/v1/results/{result_id}` - View one generated result.
+- `DELETE /api/v1/results/{result_id}` - Delete a generated result and related files.
+- `POST /api/v1/results/{result_id}/feedback` - Save user feedback for a generated result.
+- `GET /api/v1/analytics/categories` - View result count grouped by telecom issue category.
+- `GET /api/v1/analytics/status` - View result count grouped by processing status.
+- `GET /api/v1/fetch-image/{result_id}` - Safely fetch a generated image.
+- `GET /api/v1/errors` - View recent backend error logs.
 
 ## Quick Start
 To get started:
