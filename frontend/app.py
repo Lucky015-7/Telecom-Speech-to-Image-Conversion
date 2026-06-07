@@ -328,7 +328,7 @@ with st.sidebar:
     st.markdown("---")
 
      # Display the list of core platform capabilities
-    st.markdown("#### ⚡ Features")
+    st.markdown("#### Features")
     st.markdown("""
 - Voice Transcription (Whisper AI)
 - Acoustic Analysis (Librosa)
@@ -354,7 +354,7 @@ with st.sidebar:
     st.markdown("---")
 
     # Provide brief context about the application's underlying architecture
-    st.markdown("#### ℹ️ About")
+    st.markdown("#### About")
     st.markdown("""
 Advanced AI-powered platform for converting telecom customer voice recordings into visual representations using state-of-the-art deep learning.
     """)
