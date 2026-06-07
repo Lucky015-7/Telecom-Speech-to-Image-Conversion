@@ -418,7 +418,7 @@ if uploaded_file is not None:
     col_l, col_c, col_r = st.columns([1, 2, 1])
     with col_c:
         trigger_generation = st.button(
-            "🚀 Generate Situational Image",
+            "Generate Situational Image",
             type="primary",
             use_container_width=True
         )
@@ -463,7 +463,7 @@ if uploaded_file is not None:
                     
                     st.markdown("""
                     <div class='success-box'>
-                        <h4>✅ Generative Analysis Complete!</h4>
+                        <h4>Generative Analysis Complete!</h4>
                         <p>Your audio has been successfully processed through the AI pipeline.</p>
                     </div>
                     """, unsafe_allow_html=True)
