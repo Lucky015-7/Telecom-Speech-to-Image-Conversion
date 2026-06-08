@@ -136,22 +136,6 @@ def root():
         "database_connected": check_database_connection()
     }
 
-@app.get("/api/v1/health")
-def health_check():
-    """
-    Returns backend health status, database connection state,
-    and active AI model configuration.
-    """
-    database_connected = check_database_connection()
-
-    return {
-        "status": "healthy" if database_connected else "degraded",
-        "database_connected": database_connected,
-        "device": DEVICE,
-        "whisper_model": WHISPER_MODEL_NAME,
-        "image_model": IMAGE_MODEL_ID
-    }
-
 
 @app.post("/api/v1/process-audio")
 async def process_audio_endpoint(file: UploadFile = File(...)):
