@@ -667,12 +667,12 @@ if st.button("Load Category Analytics"):
         # Render the returned counts as a structured Streamlit table
                 st.table(analytics)
         else:
-            st.error(f"❌ Could not load analytics: {analytics_response.text}")
+            st.error(f" Could not load analytics: {analytics_response.text}")
 
     except Exception as analytics_error:
-        st.error(f"❌ Could not connect to backend analytics endpoint: {str(analytics_error)}")
+        st.error(f" Could not connect to backend analytics endpoint: {str(analytics_error)}")
 
-# ── Project Brand Footer 
+# ── Project Brand Footer
 # Premium developer signature signature block at the bottom of the viewport
 st.markdown("""
 <div class='footer'>
