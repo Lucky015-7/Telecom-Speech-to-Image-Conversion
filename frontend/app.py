@@ -540,7 +540,7 @@ if uploaded_file is not None:
 
                     st.markdown("<br>", unsafe_allow_html=True)
 
-        # ── Render Image Generation Prompt 
+        # ── Render Image Generation Prompt
         # Displays the detailed visual prompt built by the vocabulary layer
                     st.markdown("""
                     <div class='panel'>
@@ -580,7 +580,7 @@ if uploaded_file is not None:
                 st.error(f"❌ Could not connect to processing node backend server: {str(connection_error)}")
 
 else:
-     # ── Onboarding Welcome Screen 
+     # ── Onboarding Welcome Screen
     # Renders an introductory guide with dynamic tech stack highlights when no file is uploaded
     st.markdown("""
     <div class='welcome-card'>
