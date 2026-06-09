@@ -119,9 +119,10 @@ CATEGORY_PROMPTS = {
         "high fidelity, 8k resolution."
     ),
     "network_outage": (
-        "A dramatic, high-fidelity professional documentary-style photograph of a large telecom cellular transmission tower under dark, "
-        "heavy storm clouds with bright lightning striking in the distant sky. Working technical crew, Atmospheric moody lighting, realistic textures, rain droplets, "
-        "sharp focus, 8k resolution."
+        "A high-fidelity, professional documentary-style photograph of a large telecom cellular transmission tower during a severe storm. "
+        "At the base of the tower, a technical crew of utility workers in high-visibility orange safety jackets and hard hats is actively working "
+        "on open hardware utility cabinets and diagnostic equipment. Dark dramatic storm clouds with lightning in the distant sky, rain droplets, "
+        "wet surface reflections. Volumetric low-key lighting, shallow depth of field, sharp focus, 8k resolution."
     ),
     "fiber_installation": (
         "A clean, professional photograph of a modern residential apartment interior showing a white wall socket with a fiber optic cable plug. "
