@@ -8,6 +8,14 @@ class FeedbackRequest(BaseModel):
     comment: Optional[str] = None
 
 
+class ScenarioFrame(BaseModel):
+    sentence: str
+    category: str
+    prompt: str
+    image_path: str
+    solutions: List[str]
+
+
 class GenerationDocument(BaseModel):
     original_filename: str
     stored_audio_path: str
@@ -19,7 +27,9 @@ class GenerationDocument(BaseModel):
 
     # New backend feature field
     solutions: List[str] = Field(default_factory=list)
+    steps: List[ScenarioFrame] = Field(default_factory=list)
 
     status: str = "completed"
     feedback: Optional[Dict[str, Any]] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
