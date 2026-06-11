@@ -430,7 +430,6 @@ if uploaded_file is not None:
             progress_bar = st.progress(0)
             progress_bar.progress(20)
 
-    # Build a multipart/form-data payload containing raw audio file bytes
             multipart_payload = {
                 "file": (
                     uploaded_file.name,
@@ -441,25 +440,24 @@ if uploaded_file is not None:
 
             try:
                 progress_bar.progress(45)
-  # Send the multipart request to the FastAPI backend's process-audio route
                 response = requests.post(
                     f"{API_URL}/api/v1/process-audio",
                     files=multipart_payload
                 )
                 progress_bar.progress(75)
- # If connection and processing are successful, unpack results
+
                 if response.status_code == 200:
                     payload = response.json()
                     progress_bar.progress(100)
 
-# Unpack the nested "result" document matching backend schemas
-                    result    = payload.get("result", {})
-                    result_id = result.get("_id")
+                    result     = payload.get("result", {})
+                    result_id  = result.get("_id")
                     transcript = result.get("transcript", "No transcript available")
                     metrics    = result.get("metrics", {})
                     category   = result.get("category", "unknown")
                     prompt     = result.get("prompt", "No prompt available")
                     solutions  = result.get("solutions", [])
+                    steps      = result.get("steps", [])
                     
                     st.markdown("""
                     <div class='success-box'>
@@ -470,13 +468,11 @@ if uploaded_file is not None:
 
                     st.markdown("<br>", unsafe_allow_html=True)
                     
- # ── Render Acoustic Diagnostics Cards 
- # Displays Librosa-calculated waveform features inside premium interactive cards
+                    # ── Render Acoustic Diagnostics Cards 
                     st.markdown("<h3 style='color:#38bdf8; text-align:center;'>📡 Acoustic Analysis Metrics</h3>", unsafe_allow_html=True)
                     st.markdown("<br>", unsafe_allow_html=True)
 
                     m1, m2, m3 = st.columns(3)
-# Card 1: Signal RMS Loudness (Energy Level)
                     with m1:
                         st.markdown(f"""
                         <div class='metric-card'>
@@ -485,7 +481,6 @@ if uploaded_file is not None:
                             <div class='metric-sub'>Energy Level</div>
                         </div>
                         """, unsafe_allow_html=True)
- # Card 2: Spectral Tonal Brightness (Tonal Quality)
                     with m2:
                         st.markdown(f"""
                         <div class='metric-card'>
@@ -494,7 +489,6 @@ if uploaded_file is not None:
                             <div class='metric-sub'>Tonal Quality</div>
                         </div>
                         """, unsafe_allow_html=True)
- # Card 3: Zero-Crossing Rate (Frequency Analysis)
                     with m3:
                         st.markdown(f"""
                         <div class='metric-card'>
@@ -506,31 +500,7 @@ if uploaded_file is not None:
 
                     st.markdown("<br>", unsafe_allow_html=True)
 
-     # ── Render Telecom Issue Category
-     # Displays the category badge parsed by the vocab rules
-                    st.markdown("""
-                    <div class='panel'>
-                        <div class='panel-title'> Telecom Issue Category</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.markdown(f"<div style='margin-top:-1rem; padding:0 0.5rem;'><span class='category-badge'>{category}</span></div>", unsafe_allow_html=True)
-
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    # ── Recommended Solutions ──────────────────────────────────
-                    st.markdown("""
-                    <div class='panel'>
-                        <div class='panel-title'>🛠️ Recommended Troubleshooting Solutions</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if solutions:
-                        solutions_html = "".join([f"<li class='solution-item'> {sol}</li>" for sol in solutions])
-                        st.markdown(f"<div style='margin-top:-1rem; padding:0 0.5rem;'>{solutions_html}</div>", unsafe_allow_html=True)
-                    else:
-                        st.markdown("<div class='info-box' style='margin-top:-1rem;'>No specific troubleshooting solutions recommended for this category.</div>", unsafe_allow_html=True)
-
-                    st.markdown("<br>", unsafe_allow_html=True)
-
-                    # ── Transcript ────────────────────────────────────────────
+                    # ── Full Transcript ──
                     st.markdown("""
                     <div class='panel'>
                         <div class='panel-title'>📋 Extracted Customer Complaint Transcript</div>
@@ -540,38 +510,71 @@ if uploaded_file is not None:
 
                     st.markdown("<br>", unsafe_allow_html=True)
 
-        # ── Render Image Generation Prompt
-        # Displays the detailed visual prompt built by the vocabulary layer
-                    st.markdown("""
-                    <div class='panel'>
-                        <div class='panel-title'> Generated Image Prompt</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.markdown(f"<div class='info-box' style='margin-top:-1rem;'>{prompt}</div>", unsafe_allow_html=True)
-
+                    # ── Render Scenario Storyboard Progression ──
+                    st.markdown("<h2 style='color:#38bdf8; text-align:center; font-family:Syne,sans-serif;'>🎬 Scenario Storyboard Progression</h2>", unsafe_allow_html=True)
                     st.markdown("<br>", unsafe_allow_html=True)
 
-         # ── Render Final Synthesized Image ────────────────────────
-         # Securely requests the generated PNG from the backend using the database result ID
-                    if result_id:
-                        image_request_url = f"{API_URL}/api/v1/fetch-image/{result_id}"
-                        image_data = requests.get(image_request_url)
+                    if steps:
+                        for idx, step in enumerate(steps):
+                            st.markdown(f"""
+                            <div class='panel'>
+                                <div class='panel-title' style='color:#38bdf8;'>🖼️ Frame {idx + 1}: {step.get('category', 'general_telecom').upper().replace('_', ' ')}</div>
+                                <div style='color: #a5f3fc; font-style: italic; font-size:1.05rem; margin-top: 0.5rem; line-height:1.5;'>
+                                    "{step.get('sentence')}"
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
 
-         # If download is successful, render the centered visual output
+                            # Fetch step-specific image
+                            if result_id:
+                                image_request_url = f"{API_URL}/api/v1/fetch-image/{result_id}?step_index={idx}"
+                                image_data = requests.get(image_request_url)
 
-                        if image_data.status_code == 200:
-                            st.markdown("<h3 style='color:#38bdf8;'> High-Fidelity Synthesized Visual Output</h3>", unsafe_allow_html=True)
-                            col1, col2, col3 = st.columns([1, 4, 1])
-                            with col2:
-                                st.image(
-                                    image_data.content,
-                                    use_container_width=True,
-                                    caption="Generated Scene Map Model Frame — Stable Diffusion"
-                                )
-                        else:
-                            st.error("❌ Target asset stream could not be safely piped from backend processing nodes.")
+                                if image_data.status_code == 200:
+                                    col_l, col_img, col_r = st.columns([1, 4, 1])
+                                    with col_img:
+                                        st.image(
+                                            image_data.content,
+                                            use_container_width=True,
+                                            caption=f"Frame {idx + 1} Visual Representation"
+                                        )
+                                else:
+                                    st.error(f"❌ Could not load frame {idx + 1} image.")
+
+                            # Step Prompt
+                            st.markdown(f"""
+                            <div style='padding:0 1rem; margin-top:0.5rem;'>
+                                <strong style='color:#7dd3fc;'>Prompt:</strong>
+                                <span style='color:#94a3b8; font-size:0.9rem;'>{step.get('prompt')}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                            # Step solutions
+                            step_sols = step.get("solutions", [])
+                            st.markdown(f"""
+                            <div style='padding:0 1rem; margin-top:0.8rem;'>
+                                <strong style='color:#818cf8;'>🛠️ Frame Troubleshooting Solutions:</strong>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            if step_sols:
+                                sols_html = "".join([f"<li class='solution-item'>🔑 {sol}</li>" for sol in step_sols])
+                                st.markdown(f"<div style='padding:0 1rem;'>{sols_html}</div>", unsafe_allow_html=True)
+                            else:
+                                st.markdown("<div style='padding:0 1rem; color:#64748b;'>No specific troubleshooting solutions.</div>", unsafe_allow_html=True)
+
+                            st.markdown("<br><hr style='border-top:1px dashed rgba(255,255,255,0.1);'><br>", unsafe_allow_html=True)
                     else:
-                        st.error("❌ Result ID was not returned by backend. Cannot fetch generated image.")
+                        # Fallback for old generation results lacking step-by-step arrays
+                        if result_id:
+                            image_request_url = f"{API_URL}/api/v1/fetch-image/{result_id}"
+                            image_data = requests.get(image_request_url)
+
+                            if image_data.status_code == 200:
+                                col_l, col_img, col_r = st.columns([1, 4, 1])
+                                with col_img:
+                                    st.image(image_data.content, use_container_width=True)
+                            else:
+                                st.error("❌ Could not load generation image.")
 
                 else:
                     st.error(f"❌ Backend Server Processing Error: {response.text}")
@@ -628,17 +631,29 @@ if st.button("Load Recent Results"):
 
                     item_id = item.get("_id")
                     if item_id:
+                        history_steps = item.get("steps", [])
+                        if history_steps:
+                            st.markdown("<div style='margin-top:0.5rem;'><strong>🎬 Storyboard Progression:</strong></div>", unsafe_allow_html=True)
+                            for s_idx, s_step in enumerate(history_steps):
+                                image_url = f"{API_URL}/api/v1/fetch-image/{item_id}?step_index={s_idx}"
+                                image_response = requests.get(image_url)
+                                if image_response.status_code == 200:
+                                    st.image(
+                                        image_response.content,
+                                        use_container_width=True,
+                                        caption=f"Frame {s_idx + 1}: \"{s_step.get('sentence')}\" — {s_step.get('category').upper()}"
+                                    )
+                        else:
+                            # Fallback for old single-image records
+                            image_url = f"{API_URL}/api/v1/fetch-image/{item_id}"
+                            image_response = requests.get(image_url)
 
-          # Fetch the static PNG bytes from the secure fetch image endpoint
-                        image_url = f"{API_URL}/api/v1/fetch-image/{item_id}"
-                        image_response = requests.get(image_url)
-
-                        if image_response.status_code == 200:
-                            st.image(
-                                image_response.content,
-                                use_container_width=True,
-                                caption=f"Generated Image — {item.get('category')}"
-                            )
+                            if image_response.status_code == 200:
+                                st.image(
+                                    image_response.content,
+                                    use_container_width=True,
+                                    caption=f"Generated Image — {item.get('category')}"
+                                )
         else:
             st.error(f"❌ Could not load result history: {history_response.text}")
 
