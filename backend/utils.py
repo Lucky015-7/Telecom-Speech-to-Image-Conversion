@@ -1,5 +1,6 @@
 # Heavy ML logic: Whisper transcription, acoustic feature extraction, and image generation
 
+import re
 import torch
 import whisper
 import librosa
@@ -98,19 +99,36 @@ def transcribe_audio(audio_path: str, whisper_model) -> str:
     return transcript
 
 
-def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, list[str], object]:
+def segment_transcript_into_sentences(transcript: str) -> list[str]:
+    # Split by sentence markers (. ! ?) followed by space
+    raw_sentences = re.split(r'(?<=[.!?]) +', transcript)
+    # Filter out extremely short or non-impactful sentences (e.g. greetings like "hello", "hi")
+    valid_sentences = []
+    for s in raw_sentences:
+        clean = s.strip()
+        if not clean:
+            continue
+        # Skip short greetings/acknowledgements
+        words = clean.split()
+        if len(words) < 3 and clean.lower().rstrip('.!?') in ["hello", "hi", "ok", "okay", "yes", "no", "thank you", "thanks"]:
+            continue
+        valid_sentences.append(clean)
+    if not valid_sentences and transcript.strip():
+        valid_sentences.append(transcript.strip())
+    return valid_sentences
+
+
+def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, list[str], list[dict]]:
     """
     Runs the full AI pipeline:
     1. Load models
     2. Transcribe audio
     3. Extract acoustic features
-    4. Classify telecom issue
-    5. Retrieve troubleshooting solutions
-    6. Build image prompt
-    7. Generate image
-
+    4. Segment transcript into sentences
+    5. Generate a series of images (storyboard frames) for each sentence
+    
     Returns:
-        transcript, metrics, category, prompt, solutions, generated_image
+        transcript, metrics, overall_category, overall_prompt, overall_solutions, steps
     """
     engines = load_ai_engines()
 
@@ -118,17 +136,31 @@ def execute_generative_synthesis(audio_path: str) -> tuple[str, dict, str, str, 
 
     metrics = compute_acoustic_diagnostics(audio_path)
 
-    category = classify_telecom_category(transcript)
+    overall_category = classify_telecom_category(transcript)
+    overall_solutions = get_recommended_solutions(overall_category)
+    overall_prompt = build_prompt_from_category(overall_category, transcript)
 
-    solutions = get_recommended_solutions(category)
+    sentences = segment_transcript_into_sentences(transcript)
+    
+    steps = []
+    for sentence in sentences:
+        category = classify_telecom_category(sentence)
+        solutions = get_recommended_solutions(category)
+        prompt = build_prompt_from_category(category, sentence)
+        
+        with torch.inference_mode():
+            generated_image = engines["image_model"](
+                prompt=prompt,
+                num_inference_steps=NUM_INFERENCE_STEPS,
+                guidance_scale=GUIDANCE_SCALE
+            ).images[0]
+            
+        steps.append({
+            "sentence": sentence,
+            "category": category,
+            "prompt": prompt,
+            "solutions": solutions,
+            "image": generated_image
+        })
 
-    optimized_prompt = build_prompt_from_category(category, transcript)
-
-    with torch.inference_mode():
-        generated_image = engines["image_model"](
-            prompt=optimized_prompt,
-            num_inference_steps=NUM_INFERENCE_STEPS,
-            guidance_scale=GUIDANCE_SCALE
-        ).images[0]
-
-    return transcript, metrics, category, optimized_prompt, solutions, generated_image
+    return transcript, metrics, overall_category, overall_prompt, overall_solutions, steps
