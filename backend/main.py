@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from uuid import uuid4
+from typing import Optional
 
 from bson import ObjectId
 from fastapi import FastAPI, UploadFile, File, HTTPException
@@ -158,6 +159,7 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
             "category": None,
             "prompt": None,
             "solutions": [],
+            "steps": [],
             "status": "processing",
             "feedback": None,
             "created_at": datetime.utcnow(),
@@ -167,13 +169,25 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
         inserted_result = generations_collection.insert_one(generation_doc)
         result_id = inserted_result.inserted_id
 
-        transcript, metrics, category, prompt, solutions, image_object = execute_generative_synthesis(
+        transcript, metrics, category, prompt, solutions, steps_data = execute_generative_synthesis(
             staged_audio_path
         )
 
-        output_filename = f"prod_{result_id}.png"
-        staged_image_path = os.path.join(OUTPUT_DIR, output_filename)
-        image_object.save(staged_image_path)
+        db_steps = []
+        for idx, step in enumerate(steps_data):
+            step_filename = f"prod_{result_id}_step_{idx}.png"
+            step_image_path = os.path.join(OUTPUT_DIR, step_filename)
+            step["image"].save(step_image_path)
+            
+            db_steps.append({
+                "sentence": step["sentence"],
+                "category": step["category"],
+                "prompt": step["prompt"],
+                "solutions": step["solutions"],
+                "image_path": step_image_path
+            })
+
+        primary_image_path = db_steps[0]["image_path"] if db_steps else None
 
         generations_collection.update_one(
             {"_id": result_id},
@@ -184,7 +198,8 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
                     "category": category,
                     "prompt": prompt,
                     "solutions": solutions,
-                    "output_image_path": staged_image_path,
+                    "steps": db_steps,
+                    "output_image_path": primary_image_path,
                     "status": "completed",
                     "updated_at": datetime.utcnow()
                 }
@@ -281,9 +296,18 @@ def delete_result(result_id: str):
     stored_audio_path = result.get("stored_audio_path")
     output_image_path = result.get("output_image_path")
 
-    for path in [stored_audio_path, output_image_path]:
+    paths_to_delete = [stored_audio_path, output_image_path]
+    for step in result.get("steps", []):
+        step_image_path = step.get("image_path")
+        if step_image_path:
+            paths_to_delete.append(step_image_path)
+
+    for path in paths_to_delete:
         if path and os.path.exists(path):
-            os.remove(path)
+            try:
+                os.remove(path)
+            except Exception as e:
+                print(f"Error removing file {path}: {e}")
 
     generations_collection.delete_one({"_id": ObjectId(result_id)})
 
@@ -397,10 +421,10 @@ def get_status_analytics():
 
 
 @app.get("/api/v1/fetch-image/{result_id}")
-def fetch_image_by_result_id(result_id: str):
+def fetch_image_by_result_id(result_id: str, step_index: Optional[int] = None):
     """
     Safely retrieves generated image by result ID.
-    This is safer than accepting a full file path from the user.
+    If step_index is provided, returns the image for the specific step.
     """
     if not ObjectId.is_valid(result_id):
         raise HTTPException(status_code=400, detail="Invalid result ID.")
@@ -410,7 +434,13 @@ def fetch_image_by_result_id(result_id: str):
     if not result:
         raise HTTPException(status_code=404, detail="Result not found.")
 
-    image_path = result.get("output_image_path")
+    if step_index is not None:
+        steps = result.get("steps", [])
+        if step_index < 0 or step_index >= len(steps):
+            raise HTTPException(status_code=404, detail=f"Step index {step_index} out of range.")
+        image_path = steps[step_index].get("image_path")
+    else:
+        image_path = result.get("output_image_path")
 
     if not image_path or not os.path.exists(image_path):
         raise HTTPException(status_code=404, detail="Generated image not found.")
