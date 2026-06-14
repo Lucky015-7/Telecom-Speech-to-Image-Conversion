@@ -67,7 +67,10 @@ TELECOM_CATEGORY_KEYWORDS = {
         "breakdown",
         "outage",
         "weather",
-        "rain"
+        "rain",
+        "technical crew",
+        "crew on site",
+        "working on the hardware"
     ],
     "fiber_installation": [
         "fiber",
@@ -151,17 +154,39 @@ def classify_telecom_category(transcript: str) -> str:
 
 def build_prompt_from_category(category: str, transcript: str) -> str:
     """
-    Builds an image generation prompt based on the telecom category.
+    Builds a dynamic, context-accurate image generation prompt based on the specific transcript sentence
+    and uses category-specific stylistic guidelines.
     """
-    base_prompt = CATEGORY_PROMPTS.get(category, CATEGORY_PROMPTS["general_telecom"])
+    # Clean the sentence
+    clean_text = transcript.strip().rstrip('.!?')
+    
+    # Base prompt elements based on category
+    if category == "slow_internet":
+        style_context = "showing slow network speed, low bandwidth, or buffering indicators."
+    elif category == "no_signal":
+        style_context = "showing a phone screen with no service, empty signal bars, in an outdoor area."
+    elif category == "call_drop":
+        style_context = "showing a disconnected call status screen on a phone."
+    elif category == "router_issue":
+        style_context = "showing a home internet router with blinking warning status lights and ethernet cables."
+    elif category == "billing_issue":
+        style_context = "showing an invoice, billing ledger, or customer payment warning on a digital screen."
+    elif category == "sim_issue":
+        style_context = "showing a SIM card and SIM tray being handled."
+    elif category == "network_outage":
+        style_context = "in a severe storm setting, dark clouds, lightning, and telecom infrastructure under rain."
+    elif category == "fiber_installation":
+        style_context = "showing residential fiber terminal installation, wall socket, modem, and television setup."
+    else: # general_telecom
+        style_context = "in a telecom service, support center, or customer environment."
 
-    return (
-        f"{base_prompt} "
-        f"The customer complaint is: {transcript}. "
-        f"Make the image clear, simple, professional, and easy to understand. "
-        f"Do not include unreadable text. "
-        f"Do not include extra confusing objects."
+    # Construct prompt prioritizing the direct context of the sentence
+    prompt = (
+        f"A professional, high-fidelity documentary-style photograph depicting: {clean_text}. "
+        f"The scene is set {style_context} Realistic textures, cinematic lighting, shallow depth of field, sharp focus, 8k resolution. "
+        f"Strictly do not include any text, writing, labels, or letters in the image."
     )
+    return prompt
 
 
 CATEGORY_SOLUTIONS = {
