@@ -159,9 +159,20 @@ def build_prompt_from_category(category: str, transcript: str) -> str:
     """
     # Clean the sentence
     clean_text = transcript.strip().rstrip('.!?')
+    clean_lower = clean_text.lower()
     
-    # Base prompt elements based on category
-    if category == "slow_internet":
+    # Detect location or geographic area mentions
+    location_keywords = [
+        "district", "area", "region", "town", "suburb", "city", "village",
+        "street", "road", "highway", "avenue", "address", "location",
+        "neighborhood", "apartment block", "place", "zone", "province"
+    ]
+    is_location_mention = any(word in clean_lower for word in location_keywords)
+    
+    # Base prompt elements based on category or location detection
+    if is_location_mention and category == "general_telecom":
+        style_context = "showing a local suburban street view, neighborhood town overview, or a regional geographic area map."
+    elif category == "slow_internet":
         style_context = "showing slow network speed, low bandwidth, or buffering indicators."
     elif category == "no_signal":
         style_context = "showing a phone screen with no service, empty signal bars, in an outdoor area."
