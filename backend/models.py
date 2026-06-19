@@ -28,6 +28,7 @@ class GenerationDocument(BaseModel):
     # New backend feature field
     solutions: List[str] = Field(default_factory=list)
     steps: List[ScenarioFrame] = Field(default_factory=list)
+    collage_image_path: Optional[str] = None
 
     status: str = "completed"
     feedback: Optional[Dict[str, Any]] = None
