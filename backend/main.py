@@ -25,7 +25,7 @@ from backend.database import (
     error_logs_collection
 )
 from backend.models import FeedbackRequest
-from backend.utils import execute_generative_synthesis
+from backend.utils import execute_generative_synthesis, create_storyboard_collage
 
 
 app = FastAPI(
@@ -160,6 +160,7 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
             "prompt": None,
             "solutions": [],
             "steps": [],
+            "collage_image_path": None,
             "status": "processing",
             "feedback": None,
             "created_at": datetime.utcnow(),
@@ -189,6 +190,13 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
 
         primary_image_path = db_steps[0]["image_path"] if db_steps else None
 
+        # Compile and save storyboard collage
+        step_images = [step["image"] for step in steps_data]
+        collage_image = create_storyboard_collage(step_images)
+        collage_filename = f"prod_{result_id}_collage.png"
+        collage_image_path = os.path.join(OUTPUT_DIR, collage_filename)
+        collage_image.save(collage_image_path)
+
         generations_collection.update_one(
             {"_id": result_id},
             {
@@ -200,6 +208,7 @@ async def process_audio_endpoint(file: UploadFile = File(...)):
                     "solutions": solutions,
                     "steps": db_steps,
                     "output_image_path": primary_image_path,
+                    "collage_image_path": collage_image_path,
                     "status": "completed",
                     "updated_at": datetime.utcnow()
                 }
@@ -295,8 +304,9 @@ def delete_result(result_id: str):
 
     stored_audio_path = result.get("stored_audio_path")
     output_image_path = result.get("output_image_path")
+    collage_image_path = result.get("collage_image_path")
 
-    paths_to_delete = [stored_audio_path, output_image_path]
+    paths_to_delete = [stored_audio_path, output_image_path, collage_image_path]
     for step in result.get("steps", []):
         step_image_path = step.get("image_path")
         if step_image_path:
@@ -444,6 +454,28 @@ def fetch_image_by_result_id(result_id: str, step_index: Optional[int] = None):
 
     if not image_path or not os.path.exists(image_path):
         raise HTTPException(status_code=404, detail="Generated image not found.")
+
+    return FileResponse(image_path, media_type="image/png")
+
+
+@app.get("/api/v1/fetch-collage/{result_id}")
+def fetch_collage_by_result_id(result_id: str):
+    """
+    Safely retrieves the compiled storyboard collage image by result ID.
+    If the collage does not exist (for backward compatibility), falls back to the primary output image.
+    """
+    if not ObjectId.is_valid(result_id):
+        raise HTTPException(status_code=400, detail="Invalid result ID.")
+
+    result = generations_collection.find_one({"_id": ObjectId(result_id)})
+
+    if not result:
+        raise HTTPException(status_code=404, detail="Result not found.")
+
+    image_path = result.get("collage_image_path") or result.get("output_image_path")
+
+    if not image_path or not os.path.exists(image_path):
+        raise HTTPException(status_code=404, detail="Collage image not found.")
 
     return FileResponse(image_path, media_type="image/png")
 
