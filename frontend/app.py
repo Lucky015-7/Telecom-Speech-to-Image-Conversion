@@ -557,7 +557,7 @@ if uploaded_file is not None:
                             </div>
                             """, unsafe_allow_html=True)
                             if step_sols:
-                                sols_html = "".join([f"<li class='solution-item'>🔑 {sol}</li>" for sol in step_sols])
+                                sols_html = "".join([f"<li class='solution-item'> {sol}</li>" for sol in step_sols])
                                 st.markdown(f"<div style='padding:0 1rem;'>{sols_html}</div>", unsafe_allow_html=True)
                             else:
                                 st.markdown("<div style='padding:0 1rem; color:#64748b;'>No specific troubleshooting solutions.</div>", unsafe_allow_html=True)
