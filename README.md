@@ -49,3 +49,6 @@ The backend provides the following FastAPI endpoints:
 To get started:
 1. Install dependencies: `pip install -r requirements.txt`
 2. Start the FastAPI backend and Streamlit frontend.
+
+To start the server : uvicorn backend.main:app --reload
+To start the frontend : streamlit run frontend/app.py
