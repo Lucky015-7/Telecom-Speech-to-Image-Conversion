@@ -510,6 +510,24 @@ if uploaded_file is not None:
 
                     st.markdown("<br>", unsafe_allow_html=True)
 
+                    # ── Render Storyboard Collage Overview ──
+                    st.markdown("<h2 style='color:#a855f7; text-align:center; font-family:Syne,sans-serif;'>📊 Storyboard Overview Collage</h2>", unsafe_allow_html=True)
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    if result_id:
+                        collage_url = f"{API_URL}/api/v1/fetch-collage/{result_id}"
+                        collage_response = requests.get(collage_url)
+                        if collage_response.status_code == 200:
+                            col_l, col_img, col_r = st.columns([1, 6, 1])
+                            with col_img:
+                                st.image(
+                                    collage_response.content,
+                                    use_container_width=True,
+                                    caption="Storyboard Collage Overview Grid"
+                                )
+                        else:
+                            st.warning("⚠️ Storyboard collage overview is not available.")
+                    st.markdown("<br><br>", unsafe_allow_html=True)
+
                     # ── Render Scenario Storyboard Progression ──
                     st.markdown("<h2 style='color:#38bdf8; text-align:center; font-family:Syne,sans-serif;'>🎬 Scenario Storyboard Progression</h2>", unsafe_allow_html=True)
                     st.markdown("<br>", unsafe_allow_html=True)
@@ -603,9 +621,6 @@ st.markdown("<h3> Recent Backend Generation History</h3>", unsafe_allow_html=Tru
 # Operator triggers database query upon clicking
 if st.button("Load Recent Results"):
     try:
-
-# Request all recent generation results from the backend audit API
-    
         history_response = requests.get(f"{API_URL}/api/v1/results")
 
         if history_response.status_code == 200:
@@ -615,8 +630,6 @@ if st.button("Load Recent Results"):
             if len(results) == 0:
                 st.info("No previous generation records found.")
             else:
-
-    # Loop through database transactions and render descriptive cards + images
                 for item in results:
                     st.markdown(f"""
                     <div class='history-item'>
@@ -631,20 +644,17 @@ if st.button("Load Recent Results"):
 
                     item_id = item.get("_id")
                     if item_id:
-                        history_steps = item.get("steps", [])
-                        if history_steps:
-                            st.markdown("<div style='margin-top:0.5rem;'><strong>🎬 Storyboard Progression:</strong></div>", unsafe_allow_html=True)
-                            for s_idx, s_step in enumerate(history_steps):
-                                image_url = f"{API_URL}/api/v1/fetch-image/{item_id}?step_index={s_idx}"
-                                image_response = requests.get(image_url)
-                                if image_response.status_code == 200:
-                                    st.image(
-                                        image_response.content,
-                                        use_container_width=True,
-                                        caption=f"Frame {s_idx + 1}: \"{s_step.get('sentence')}\" — {s_step.get('category').upper()}"
-                                    )
+                        collage_url = f"{API_URL}/api/v1/fetch-collage/{item_id}"
+                        collage_response = requests.get(collage_url)
+
+                        if collage_response.status_code == 200:
+                            st.image(
+                                collage_response.content,
+                                use_container_width=True,
+                                caption=f"Storyboard Collage Overview — {item.get('category', 'unknown').upper()}"
+                            )
                         else:
-                            # Fallback for old single-image records
+                            # Fallback for old records without collages
                             image_url = f"{API_URL}/api/v1/fetch-image/{item_id}"
                             image_response = requests.get(image_url)
 
@@ -652,7 +662,7 @@ if st.button("Load Recent Results"):
                                 st.image(
                                     image_response.content,
                                     use_container_width=True,
-                                    caption=f"Generated Image — {item.get('category')}"
+                                    caption=f"Generated Image — {item.get('category', 'unknown')}"
                                 )
         else:
             st.error(f"❌ Could not load result history: {history_response.text}")

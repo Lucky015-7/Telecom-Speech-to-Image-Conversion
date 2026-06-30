@@ -22,6 +22,7 @@ try:
     output_dir = os.path.join(os.path.dirname(__file__), "data", "outputs")
     os.makedirs(output_dir, exist_ok=True)
     
+    step_images = []
     for idx, step in enumerate(steps):
         print(f"\n--- STEP {idx + 1} ---")
         print(f"Sentence: {step['sentence']}")
@@ -32,6 +33,14 @@ try:
         image_path = os.path.join(output_dir, f"test_run_step_{idx}.png")
         step['image'].save(image_path)
         print(f"Saved step image to: {image_path}")
+        step_images.append(step['image'])
+        
+    print("\nGenerating storyboard collage...")
+    from backend.utils import create_storyboard_collage
+    collage = create_storyboard_collage(step_images)
+    collage_path = os.path.join(output_dir, "test_run_collage.png")
+    collage.save(collage_path)
+    print(f"Saved storyboard collage to: {collage_path}")
         
 except Exception as e:
     print("Execution failed!")

@@ -1,6 +1,8 @@
 # Heavy ML logic: Whisper transcription, acoustic feature extraction, and image generation
 
 import re
+import math
+from PIL import Image
 import torch
 import whisper
 import librosa
@@ -97,6 +99,49 @@ def transcribe_audio(audio_path: str, whisper_model) -> str:
         transcript = "telecommunication network service problem"
 
     return transcript
+
+
+def create_storyboard_collage(images: list[Image.Image], thumb_size: int = 512, padding: int = 10) -> Image.Image:
+    """
+    Combines a list of PIL Images into a single collage grid.
+    """
+    if not images:
+        return Image.new("RGB", (thumb_size, thumb_size), color=(30, 30, 30))
+        
+    num_images = len(images)
+    
+    # Calculate grid size (cols, rows)
+    if num_images <= 3:
+        cols = num_images
+        rows = 1
+    elif num_images == 4:
+        cols = 2
+        rows = 2
+    else:
+        cols = 3
+        rows = math.ceil(num_images / 3)
+        
+    # Resize all images to standard thumbnail size
+    resized_images = [img.resize((thumb_size, thumb_size), Image.Resampling.LANCZOS) for img in images]
+    
+    # Create the canvas size
+    canvas_width = cols * thumb_size + (cols - 1) * padding
+    canvas_height = rows * thumb_size + (rows - 1) * padding
+    
+    # Create a dark background canvas matching the app theme
+    collage = Image.new("RGB", (canvas_width, canvas_height), color=(15, 23, 42)) # Slate 900
+    
+    # Paste images into the grid
+    for idx, img in enumerate(resized_images):
+        col_idx = idx % cols
+        row_idx = idx // cols
+        
+        x = col_idx * (thumb_size + padding)
+        y = row_idx * (thumb_size + padding)
+        
+        collage.paste(img, (x, y))
+        
+    return collage
 
 
 def segment_transcript_into_sentences(transcript: str) -> list[str]:
