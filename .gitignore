@@ -18,3 +18,6 @@ data/outputs/*
 # OS specific files
 .DS_Store
 Thumbs.dbS
+
+# Model And Other Cache Files
+.cache
